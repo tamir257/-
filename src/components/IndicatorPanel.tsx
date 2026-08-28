@@ -1,6 +1,9 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { OverlayConfig } from "./PriceChart";
+import HelpTooltip from "./HelpTooltip";
+import { GLOSSARY } from "@/lib/glossary";
 
 interface Props {
   overlays: OverlayConfig;
@@ -16,7 +19,7 @@ function Checkbox({
   checked,
   onChange,
 }: {
-  label: string;
+  label: ReactNode;
   checked: boolean;
   onChange: (v: boolean) => void;
 }) {
@@ -63,7 +66,9 @@ export default function IndicatorPanel({
         אינדיקטורים
       </h2>
       <div className="mb-3 flex flex-col gap-1">
-        <span className="text-xs text-gray-500">ממוצעים נעים</span>
+        <span className="text-xs text-gray-500">
+          ממוצעים נעים <HelpTooltip text={GLOSSARY.sma} />
+        </span>
         <Checkbox
           label="SMA 20"
           checked={overlays.sma.includes(20)}
@@ -74,6 +79,9 @@ export default function IndicatorPanel({
           checked={overlays.sma.includes(50)}
           onChange={(v) => toggleSma(50, v)}
         />
+        <span className="mt-1 flex items-center text-xs text-gray-500">
+          <HelpTooltip text={GLOSSARY.ema} />
+        </span>
         <Checkbox
           label="EMA 9"
           checked={overlays.ema.includes(9)}
@@ -88,7 +96,11 @@ export default function IndicatorPanel({
       <div className="mb-3 flex flex-col gap-1">
         <span className="text-xs text-gray-500">רצועות ונפח</span>
         <Checkbox
-          label="Bollinger Bands (20, 2)"
+          label={
+            <span className="flex items-center gap-1">
+              Bollinger Bands (20, 2) <HelpTooltip text={GLOSSARY.bollinger} />
+            </span>
+          }
           checked={overlays.bollinger !== null}
           onChange={(v) =>
             setOverlays({
@@ -98,16 +110,32 @@ export default function IndicatorPanel({
           }
         />
         <Checkbox
-          label="נפח (Volume)"
+          label={
+            <span className="flex items-center gap-1">
+              נפח (Volume) <HelpTooltip text={GLOSSARY.volume} />
+            </span>
+          }
           checked={overlays.volume}
           onChange={(v) => setOverlays({ ...overlays, volume: v })}
         />
       </div>
       <div className="flex flex-col gap-1">
         <span className="text-xs text-gray-500">אוסילטורים (פאנל נפרד)</span>
-        <Checkbox label="RSI (14)" checked={showRSI} onChange={setShowRSI} />
         <Checkbox
-          label="MACD (12, 26, 9)"
+          label={
+            <span className="flex items-center gap-1">
+              RSI (14) <HelpTooltip text={GLOSSARY.rsi} />
+            </span>
+          }
+          checked={showRSI}
+          onChange={setShowRSI}
+        />
+        <Checkbox
+          label={
+            <span className="flex items-center gap-1">
+              MACD (12, 26, 9) <HelpTooltip text={GLOSSARY.macd} />
+            </span>
+          }
           checked={showMACD}
           onChange={setShowMACD}
         />

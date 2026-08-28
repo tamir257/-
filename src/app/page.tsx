@@ -7,9 +7,16 @@ import IndicatorSubChart from "@/components/IndicatorSubChart";
 import Watchlist from "@/components/Watchlist";
 import IndicatorPanel from "@/components/IndicatorPanel";
 import Toolbar from "@/components/Toolbar";
+import InsightsPanel from "@/components/InsightsPanel";
+import AlertsPanel from "@/components/AlertsPanel";
+import AlertToast from "@/components/AlertToast";
 import { useCandles } from "@/hooks/useCandles";
 import { useLiveQuote } from "@/hooks/useLiveQuote";
+import { useWatchlist } from "@/hooks/useWatchlist";
+import { useWatchlistQuotes } from "@/hooks/useWatchlistQuotes";
+import { useAlerts } from "@/hooks/useAlerts";
 import { macd as calcMacd, rsi as calcRsi } from "@/lib/indicators";
+import { generateInsights } from "@/lib/insights";
 import { Resolution } from "@/lib/marketData";
 
 const DEFAULT_OVERLAYS: OverlayConfig = {
@@ -30,11 +37,13 @@ export default function Home() {
   const [clearSignal, setClearSignal] = useState(0);
   const [logicalRange, setLogicalRange] = useState<LogicalRange | null>(null);
 
+  const { symbols, addSymbol, removeSymbol } = useWatchlist();
   const { candles: baseCandles, loading, error } = useCandles(
     symbol,
     resolution
   );
   const { quote, error: quoteError } = useLiveQuote(symbol);
+  const watchlistQuotes = useWatchlistQuotes(symbols);
 
   // Merge the polled "live" (delayed) quote into the most recent candle so
   // the chart's last bar visibly moves without a full historical re-fetch.
@@ -70,18 +79,23 @@ export default function Home() {
     return baseCandles;
   }, [baseCandles, quote, resolution]);
 
-  const rsiLines = useMemo(() => {
-    const closes = candles.map((c) => c.close);
-    const values = calcRsi(closes, 14);
-    return [
+  const rsiValues = useMemo(
+    () => calcRsi(candles.map((c) => c.close), 14),
+    [candles]
+  );
+  const lastRsi = rsiValues.length > 0 ? rsiValues[rsiValues.length - 1] : null;
+
+  const rsiLines = useMemo(
+    () => [
       {
         color: "#a855f7",
         data: candles
-          .map((c, i) => ({ time: c.time as never, value: values[i] }))
+          .map((c, i) => ({ time: c.time as never, value: rsiValues[i] }))
           .filter((d): d is { time: never; value: number } => d.value !== null),
       },
-    ];
-  }, [candles]);
+    ],
+    [candles, rsiValues]
+  );
 
   const macdLines = useMemo(() => {
     const closes = candles.map((c) => c.close);
@@ -95,6 +109,18 @@ export default function Home() {
       { color: "#f59e0b", data: build(signal) },
     ];
   }, [candles]);
+
+  const insights = useMemo(() => generateInsights(candles), [candles]);
+
+  const {
+    alerts,
+    addAlert,
+    removeAlert,
+    toasts,
+    dismissToast,
+    notificationPermission,
+    requestNotificationPermission,
+  } = useAlerts(watchlistQuotes, symbol, lastRsi);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -180,8 +206,27 @@ export default function Home() {
           )}
         </main>
 
-        <Watchlist activeSymbol={symbol} onSelect={setSymbol} />
+        <aside className="flex w-56 shrink-0 flex-col overflow-y-auto">
+          <Watchlist
+            symbols={symbols}
+            activeSymbol={symbol}
+            onSelect={setSymbol}
+            onAdd={addSymbol}
+            onRemove={removeSymbol}
+          />
+          <InsightsPanel insights={insights} />
+          <AlertsPanel
+            symbol={symbol}
+            alerts={alerts.filter((a) => a.symbol === symbol)}
+            onAdd={addAlert}
+            onRemove={removeAlert}
+            notificationPermission={notificationPermission}
+            onRequestNotificationPermission={requestNotificationPermission}
+          />
+        </aside>
       </div>
+
+      <AlertToast toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
