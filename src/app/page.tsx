@@ -12,12 +12,15 @@ import AlertsPanel from "@/components/AlertsPanel";
 import AlertToast from "@/components/AlertToast";
 import ChatPanel from "@/components/ChatPanel";
 import PortfolioPanel from "@/components/PortfolioPanel";
+import PresetsPanel from "@/components/PresetsPanel";
 import { useCandles } from "@/hooks/useCandles";
 import { useLiveQuote } from "@/hooks/useLiveQuote";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useWatchlistQuotes } from "@/hooks/useWatchlistQuotes";
 import { useAlerts } from "@/hooks/useAlerts";
 import { useIbkrPortfolio } from "@/hooks/useIbkrPortfolio";
+import { usePresets } from "@/hooks/usePresets";
+import { IndicatorPreset } from "@/lib/presets/types";
 import { macd as calcMacd, rsi as calcRsi } from "@/lib/indicators";
 import { generateInsights } from "@/lib/insights";
 import { buildChatContext } from "@/lib/claude/buildContext";
@@ -137,6 +140,13 @@ export default function Home() {
     ibkrPositions.find((p) => (p.ticker ?? "").toUpperCase() === symbol.toUpperCase()) ??
     null;
 
+  const { presets, savePreset, removePreset } = usePresets();
+  function applyPreset(preset: IndicatorPreset) {
+    setOverlays(preset.overlays);
+    setShowRSI(preset.showRSI);
+    setShowMACD(preset.showMACD);
+  }
+
   // Read fresh at send-time (not memoized) — the chat only needs the
   // current values when the user actually sends a message.
   const buildContext = () =>
@@ -169,14 +179,25 @@ export default function Home() {
       </header>
 
       <div className="flex flex-1">
-        <IndicatorPanel
-          overlays={overlays}
-          setOverlays={setOverlays}
-          showRSI={showRSI}
-          setShowRSI={setShowRSI}
-          showMACD={showMACD}
-          setShowMACD={setShowMACD}
-        />
+        <aside className="flex w-56 shrink-0 flex-col overflow-y-auto">
+          <IndicatorPanel
+            overlays={overlays}
+            setOverlays={setOverlays}
+            showRSI={showRSI}
+            setShowRSI={setShowRSI}
+            showMACD={showMACD}
+            setShowMACD={setShowMACD}
+          />
+          <PresetsPanel
+            presets={presets}
+            currentOverlays={overlays}
+            currentShowRSI={showRSI}
+            currentShowMACD={showMACD}
+            onSave={savePreset}
+            onRemove={removePreset}
+            onApply={applyPreset}
+          />
+        </aside>
 
         <main className="flex-1 overflow-hidden">
           <Toolbar

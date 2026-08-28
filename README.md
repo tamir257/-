@@ -144,9 +144,13 @@ Gateway בכלל (מחזירים הודעת שגיאה ברורה במקום ל�
   מה חוזר מה-Gateway — זה יעזור לתקן במהירות שמות שדות אם הם שונים.
 - שלח לי את הפלט ואתקן לפי מה שבאמת חוזר.
 
-## שמירה על תבניות אינדיקטורים (בהמשך)
+## מצב נוכחי: תבניות אינדיקטורים ✅
 
-- 🔜 שמירת תבניות אינדיקטורים מותאמות אישית
+- ✅ **פאנל "תבניות אינדיקטורים"** מתחת לרשימת האינדיקטורים — שומר את
+  ההגדרה הנוכחית (אילו SMA/EMA/Bollinger/Volume פעילים, והאם RSI/MACD
+  מוצגים) תחת שם שבחרת, ב-localStorage. לחיצה על שם תבנית טוענת אותה
+  חזרה מיידית; אין יותר צורך להגדיר מחדש כל פעם קונפיגורציה שאתה חוזר
+  אליה הרבה (למשל "המצב שלי" = EMA9+EMA21+RSI, או "ניתוח נפח" = Bollinger+Volume).
 
 ## מבנה הקוד
 
@@ -166,16 +170,19 @@ src/
     AlertsPanel.tsx, AlertToast.tsx     — ניהול והצגת התראות
     ChatPanel.tsx                        — חלון הצ'אט עם Claude
     PortfolioPanel.tsx                   — תיק IBKR (read-only)
+    PresetsPanel.tsx                      — שמירה/טעינה של תבניות אינדיקטורים
   hooks/
     useCandles.ts, useLiveQuote.ts     — נתוני הטיקר הפתוח
     useWatchlist.ts, useWatchlistQuotes.ts  — רשימת מעקב + ציטוטים לכולה
     useAlerts.ts                        — הגדרה/בדיקה/הפעלה של התראות
     useChat.ts                          — קריאת ה-streaming מ-/api/chat
     useIbkrPortfolio.ts                  — סטטוס חיבור + פוזיציות + keep-alive
+    usePresets.ts                        — שמירה/טעינה של תבניות אינדיקטורים
   lib/
     marketData/             — ממשק ספק נתונים + מימוש Stooq
     indicators/              — SMA/EMA/RSI/MACD/Bollinger/VWAP (טהורים, ניתנים לבדיקה)
     insights/                — כללי "תובנות אוטומטיות" (לא AI — heuristics קבועות)
+    presets/types.ts         — טיפוס תבנית אינדיקטורים
     glossary.ts              — טקסטי ההסבר לכפתורי ה-"?"
     alerts/types.ts          — טיפוסי ההתראות
     claude/                  — קליינט Claude, ההנחיה הקבועה, ובניית הקונטקסט לצ'אט

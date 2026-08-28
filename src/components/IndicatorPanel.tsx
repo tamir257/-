@@ -61,7 +61,7 @@ export default function IndicatorPanel({
     });
 
   return (
-    <div className="w-56 shrink-0 border-r border-gray-800 p-3">
+    <div className="border-r border-gray-800 p-3">
       <h2 className="mb-2 text-sm font-semibold text-gray-300">
         אינדיקטורים
       </h2>
