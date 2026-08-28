@@ -11,11 +11,13 @@ import InsightsPanel from "@/components/InsightsPanel";
 import AlertsPanel from "@/components/AlertsPanel";
 import AlertToast from "@/components/AlertToast";
 import ChatPanel from "@/components/ChatPanel";
+import PortfolioPanel from "@/components/PortfolioPanel";
 import { useCandles } from "@/hooks/useCandles";
 import { useLiveQuote } from "@/hooks/useLiveQuote";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useWatchlistQuotes } from "@/hooks/useWatchlistQuotes";
 import { useAlerts } from "@/hooks/useAlerts";
+import { useIbkrPortfolio } from "@/hooks/useIbkrPortfolio";
 import { macd as calcMacd, rsi as calcRsi } from "@/lib/indicators";
 import { generateInsights } from "@/lib/insights";
 import { buildChatContext } from "@/lib/claude/buildContext";
@@ -125,10 +127,27 @@ export default function Home() {
     requestNotificationPermission,
   } = useAlerts(watchlistQuotes, symbol, lastRsi);
 
+  const {
+    connection: ibkrConnection,
+    positions: ibkrPositions,
+    summary: ibkrSummary,
+    error: ibkrError,
+  } = useIbkrPortfolio();
+  const activePosition =
+    ibkrPositions.find((p) => (p.ticker ?? "").toUpperCase() === symbol.toUpperCase()) ??
+    null;
+
   // Read fresh at send-time (not memoized) — the chat only needs the
   // current values when the user actually sends a message.
   const buildContext = () =>
-    buildChatContext({ symbol, quote, lastRsi, overlays, insights });
+    buildChatContext({
+      symbol,
+      quote,
+      lastRsi,
+      overlays,
+      insights,
+      position: activePosition,
+    });
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -191,6 +210,11 @@ export default function Home() {
                 clearDrawingsSignal={clearSignal}
                 logicalRange={logicalRange}
                 onLogicalRangeChange={setLogicalRange}
+                positionEntryPrice={
+                  activePosition
+                    ? (activePosition.avgCost ?? activePosition.avgPrice ?? null)
+                    : null
+                }
               />
               {showRSI && (
                 <IndicatorSubChart
@@ -234,6 +258,12 @@ export default function Home() {
             onRemove={removeAlert}
             notificationPermission={notificationPermission}
             onRequestNotificationPermission={requestNotificationPermission}
+          />
+          <PortfolioPanel
+            connection={ibkrConnection}
+            positions={ibkrPositions}
+            summary={ibkrSummary}
+            error={ibkrError}
           />
         </aside>
       </div>

@@ -1,6 +1,7 @@
 import { Quote } from "@/lib/marketData";
 import { Insight } from "@/lib/insights";
 import { OverlayConfig } from "@/components/PriceChart";
+import { IbkrPosition } from "@/lib/ibkr/types";
 
 /**
  * Compact, plain-text summary of what's currently on screen — sent as part
@@ -15,8 +16,9 @@ export function buildChatContext(params: {
   lastRsi: number | null;
   overlays: OverlayConfig;
   insights: Insight[];
+  position?: IbkrPosition | null;
 }): string {
-  const { symbol, quote, lastRsi, overlays, insights } = params;
+  const { symbol, quote, lastRsi, overlays, insights, position } = params;
   const lines: string[] = [];
 
   lines.push(`טיקר פתוח כרגע בגרף: ${symbol}`);
@@ -45,6 +47,17 @@ export function buildChatContext(params: {
       activeOverlays.length ? activeOverlays.join(", ") : "אין"
     }`
   );
+
+  if (position) {
+    const entry = position.avgCost ?? position.avgPrice;
+    lines.push(
+      `למשתמש יש פוזיציה פתוחה ב-${symbol} (מחשבון IBKR מחובר, read-only): כמות ${position.position}` +
+        (entry !== undefined ? `, עלות ממוצעת ${entry.toFixed(2)}` : "") +
+        (position.unrealizedPnl !== undefined
+          ? `, רווח/הפסד לא ממומש ${position.unrealizedPnl.toFixed(2)}`
+          : "")
+    );
+  }
 
   if (insights.length > 0) {
     lines.push("תובנות אוטומטיות שהאפליקציה זיהתה כרגע (מבוססות כללים, לא נכתבו על ידך):");

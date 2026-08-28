@@ -34,6 +34,8 @@ interface Props {
   clearDrawingsSignal: number;
   logicalRange: LogicalRange | null;
   onLogicalRangeChange: (range: LogicalRange | null) => void;
+  /** Average cost of an open IBKR position in this symbol, if any — drawn as a fixed reference line (not a user drawing, unaffected by "clear drawings"). */
+  positionEntryPrice?: number | null;
 }
 
 export default function PriceChart({
@@ -43,6 +45,7 @@ export default function PriceChart({
   clearDrawingsSignal,
   logicalRange,
   onLogicalRangeChange,
+  positionEntryPrice,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -57,6 +60,7 @@ export default function PriceChart({
   const pendingPointRef = useRef<{ time: number; price: number } | null>(
     null
   );
+  const positionLineRef = useRef<IPriceLine | null>(null);
 
   // --- Create the chart once ---
   useEffect(() => {
@@ -254,6 +258,29 @@ export default function PriceChart({
     chart.subscribeClick(handler);
     return () => chart.unsubscribeClick(handler);
   }, [drawingMode]);
+
+  // --- IBKR position entry-price reference line (not a user drawing) ---
+  useEffect(() => {
+    const candleSeries = candleSeriesRef.current;
+    if (!candleSeries) return;
+
+    if (positionLineRef.current) {
+      candleSeries.removePriceLine(positionLineRef.current);
+      positionLineRef.current = null;
+    }
+    if (positionEntryPrice != null) {
+      positionLineRef.current = candleSeries.createPriceLine({
+        price: positionEntryPrice,
+        color: "#8b5cf6",
+        lineWidth: 2,
+        lineStyle: 3,
+        axisLabelVisible: true,
+        title: `עלות ממוצעת: ${positionEntryPrice.toFixed(2)}`,
+      });
+    }
+    // Price lines are series-level overlays, unaffected by candleSeries.setData() —
+    // no need to depend on `candles` here.
+  }, [positionEntryPrice]);
 
   // --- Clear all drawings when asked to ---
   useEffect(() => {
