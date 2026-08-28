@@ -9,6 +9,8 @@ interface Props {
   onClearDrawings: () => void;
   resolution: Resolution;
   setResolution: (r: Resolution) => void;
+  showChat: boolean;
+  onToggleChat: () => void;
 }
 
 const RESOLUTIONS: { value: Resolution; label: string }[] = [
@@ -23,6 +25,8 @@ export default function Toolbar({
   onClearDrawings,
   resolution,
   setResolution,
+  showChat,
+  onToggleChat,
 }: Props) {
   const btn = (mode: DrawingMode, label: string) => (
     <button
@@ -61,6 +65,16 @@ export default function Toolbar({
           {r.label}
         </button>
       ))}
+      <button
+        onClick={onToggleChat}
+        className={`mr-auto rounded px-3 py-1 text-sm ${
+          showChat
+            ? "bg-blue-600 text-white"
+            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+        }`}
+      >
+        🤖 עוזר AI
+      </button>
     </div>
   );
 }

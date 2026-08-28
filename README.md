@@ -68,13 +68,33 @@ npm run dev
   פתוח בגרף, כי צריך את היסטוריית הנרות לחישוב). התראה מופיעה כהודעה בתוך
   האפליקציה ובנוסף כהתראת מערכת של הדפדפן אם אישרת הרשאה. נשמר ב-localStorage.
 
-## מפת דרכים — Phase 2ב (בהמשך, דורש מפתחות/הרשאות חיצוניים)
+## מצב נוכחי: Phase 2ב חלק א' (צ'אט AI עם Claude) ✅
+
+- ✅ **עוזר AI אינטראקטיבי** (`src/app/api/chat/route.ts`, `src/components/ChatPanel.tsx`) —
+  כפתור "🤖 עוזר AI" בסרגל הכלים פותח חלון צ'אט מתחת לגרף. כל שאלה נשלחת
+  יחד עם תקציר קונטקסט חי (הטיקר הפתוח, המחיר, RSI נוכחי, האינדיקטורים
+  הפעילים, והתובנות האוטומטיות שכבר חושבו) כך שהתשובות מבוססות על מה שבאמת
+  רואים במסך ולא ניחוש. התשובה זורמת (streaming) מילה-מילה.
+  התשובות מוגבלות במפורש (בהנחיה למודל) **לא** לתת המלצת קנייה/מכירה או
+  ייעוץ השקעות — רק הסבר ולימוד.
+- ✅ שימוש במודל `claude-opus-5` דרך ה-SDK הרשמי (`@anthropic-ai/sdk`), עם
+  prompt caching על ההנחיה הקבועה כדי לחסוך עלות בשיחות ארוכות.
+
+### הפעלת הצ'אט
+1. השג מפתח API מ-https://console.anthropic.com
+2. `cp .env.example .env.local` ומלא את `ANTHROPIC_API_KEY=`
+3. הרץ מחדש `npm run dev`
+
+**הערת פיתוח:** בדקתי כאן שהקוד עובר טייפצ'ק/לינט/בילד נקי, ושה-route מחזיר
+הודעת שגיאה ברורה כשאין מפתח מוגדר. לא היה לי מפתח Anthropic זמין בסביבת
+הפיתוח כדי לבדוק שיחה אמיתית קצה-לקצה — **כדאי לבדוק זאת ראשית** אחרי
+שמגדירים את המפתח.
+
+## מפת דרכים — Phase 2ב חלק ב' (בהמשך, דורש הרצת שירות מהצד שלך)
 
 - 🔜 חיבור read-only ל-Interactive Brokers (Client Portal API) — פוזיציות,
   P&L והיסטוריית עסקאות, מוצג ישירות על הגרף. דורש הרצת IBKR Gateway אצלך.
-- 🔜 עוזר AI אינטראקטיבי (צ'אט מבוסס Claude API) שרואה את הקונטקסט של הגרף,
-  התובנות האוטומטיות והתיק ועונה על שאלות חופשיות — לא ייעוץ השקעות. דורש
-  מפתח Anthropic API.
+  כשזה יהיה מוכן, הקונטקסט שנשלח לצ'אט יתעדכן אוטומטית לכלול גם את הפוזיציות.
 - 🔜 שמירת תבניות אינדיקטורים מותאמות אישית
 
 ## מבנה הקוד
@@ -84,6 +104,7 @@ src/
   app/
     api/candles/route.ts   — proxy שרת-צד ל-Stooq (נרות היסטוריים)
     api/quote/route.ts     — proxy שרת-צד ל-Stooq (ציטוט אחרון)
+    api/chat/route.ts      — streaming proxy לצ'אט Claude
     page.tsx               — הדף הראשי, מחבר את כל הרכיבים
   components/
     PriceChart.tsx          — גרף נרות ראשי + אוברליים + כלי ציור
@@ -91,16 +112,19 @@ src/
     Watchlist.tsx, IndicatorPanel.tsx, Toolbar.tsx
     InsightsPanel.tsx, HelpTooltip.tsx  — שכבת ההדרכה
     AlertsPanel.tsx, AlertToast.tsx     — ניהול והצגת התראות
+    ChatPanel.tsx                        — חלון הצ'אט עם Claude
   hooks/
     useCandles.ts, useLiveQuote.ts     — נתוני הטיקר הפתוח
     useWatchlist.ts, useWatchlistQuotes.ts  — רשימת מעקב + ציטוטים לכולה
     useAlerts.ts                        — הגדרה/בדיקה/הפעלה של התראות
+    useChat.ts                          — קריאת ה-streaming מ-/api/chat
   lib/
     marketData/             — ממשק ספק נתונים + מימוש Stooq
     indicators/              — SMA/EMA/RSI/MACD/Bollinger/VWAP (טהורים, ניתנים לבדיקה)
     insights/                — כללי "תובנות אוטומטיות" (לא AI — heuristics קבועות)
     glossary.ts              — טקסטי ההסבר לכפתורי ה-"?"
     alerts/types.ts          — טיפוסי ההתראות
+    claude/                  — קליינט Claude, ההנחיה הקבועה, ובניית הקונטקסט לצ'אט
 ```
 
 ⚠️ **הבהרה:** כלי זה מיועד לחינוך ולניתוח טכני בלבד, ואינו מהווה ייעוץ השקעות.

@@ -10,6 +10,7 @@ import Toolbar from "@/components/Toolbar";
 import InsightsPanel from "@/components/InsightsPanel";
 import AlertsPanel from "@/components/AlertsPanel";
 import AlertToast from "@/components/AlertToast";
+import ChatPanel from "@/components/ChatPanel";
 import { useCandles } from "@/hooks/useCandles";
 import { useLiveQuote } from "@/hooks/useLiveQuote";
 import { useWatchlist } from "@/hooks/useWatchlist";
@@ -17,6 +18,7 @@ import { useWatchlistQuotes } from "@/hooks/useWatchlistQuotes";
 import { useAlerts } from "@/hooks/useAlerts";
 import { macd as calcMacd, rsi as calcRsi } from "@/lib/indicators";
 import { generateInsights } from "@/lib/insights";
+import { buildChatContext } from "@/lib/claude/buildContext";
 import { Resolution } from "@/lib/marketData";
 
 const DEFAULT_OVERLAYS: OverlayConfig = {
@@ -36,6 +38,7 @@ export default function Home() {
   const clearCounter = useRef(0);
   const [clearSignal, setClearSignal] = useState(0);
   const [logicalRange, setLogicalRange] = useState<LogicalRange | null>(null);
+  const [showChat, setShowChat] = useState(false);
 
   const { symbols, addSymbol, removeSymbol } = useWatchlist();
   const { candles: baseCandles, loading, error } = useCandles(
@@ -122,6 +125,11 @@ export default function Home() {
     requestNotificationPermission,
   } = useAlerts(watchlistQuotes, symbol, lastRsi);
 
+  // Read fresh at send-time (not memoized) — the chat only needs the
+  // current values when the user actually sends a message.
+  const buildContext = () =>
+    buildChatContext({ symbol, quote, lastRsi, overlays, insights });
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
@@ -161,6 +169,8 @@ export default function Home() {
             }}
             resolution={resolution}
             setResolution={setResolution}
+            showChat={showChat}
+            onToggleChat={() => setShowChat((v) => !v)}
           />
 
           {loading && (
@@ -204,6 +214,8 @@ export default function Home() {
               )}
             </>
           )}
+
+          {showChat && <ChatPanel buildContext={buildContext} />}
         </main>
 
         <aside className="flex w-56 shrink-0 flex-col overflow-y-auto">
