@@ -11,6 +11,7 @@ import InsightsPanel from "@/components/InsightsPanel";
 import AlertsPanel from "@/components/AlertsPanel";
 import AlertToast from "@/components/AlertToast";
 import ChatPanel from "@/components/ChatPanel";
+import FaqPanel from "@/components/FaqPanel";
 import PortfolioPanel from "@/components/PortfolioPanel";
 import PresetsPanel from "@/components/PresetsPanel";
 import OnboardingModal from "@/components/OnboardingModal";
@@ -22,6 +23,7 @@ import { useWatchlistQuotes } from "@/hooks/useWatchlistQuotes";
 import { useAlerts } from "@/hooks/useAlerts";
 import { useIbkrPortfolio } from "@/hooks/useIbkrPortfolio";
 import { usePresets } from "@/hooks/usePresets";
+import { useFaq } from "@/hooks/useFaq";
 import { IndicatorPreset } from "@/lib/presets/types";
 import { macd as calcMacd, rsi as calcRsi } from "@/lib/indicators";
 import { generateInsights } from "@/lib/insights";
@@ -46,6 +48,7 @@ export default function Home() {
   const [clearSignal, setClearSignal] = useState(0);
   const [logicalRange, setLogicalRange] = useState<LogicalRange | null>(null);
   const [showChat, setShowChat] = useState(false);
+  const [showFaq, setShowFaq] = useState(false);
 
   const { symbols, addSymbol, removeSymbol } = useWatchlist();
   const { candles: baseCandles, loading, error } = useCandles(
@@ -143,6 +146,7 @@ export default function Home() {
     null;
 
   const { presets, savePreset, removePreset } = usePresets();
+  const { entries: faqEntries, addEntry: addFaqEntry, removeEntry: removeFaqEntry } = useFaq();
   const { open: onboardingOpen, close: closeOnboarding, reopen: reopenOnboarding } = useOnboarding();
   function applyPreset(preset: IndicatorPreset) {
     setOverlays(preset.overlays);
@@ -224,6 +228,8 @@ export default function Home() {
             setResolution={setResolution}
             showChat={showChat}
             onToggleChat={() => setShowChat((v) => !v)}
+            showFaq={showFaq}
+            onToggleFaq={() => setShowFaq((v) => !v)}
           />
 
           {loading && (
@@ -273,6 +279,13 @@ export default function Home() {
             </>
           )}
 
+          {showFaq && (
+            <FaqPanel
+              entries={faqEntries}
+              onAddEntry={addFaqEntry}
+              onRemoveEntry={removeFaqEntry}
+            />
+          )}
           {showChat && <ChatPanel buildContext={buildContext} />}
         </main>
 

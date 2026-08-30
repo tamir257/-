@@ -11,6 +11,8 @@ interface Props {
   setResolution: (r: Resolution) => void;
   showChat: boolean;
   onToggleChat: () => void;
+  showFaq: boolean;
+  onToggleFaq: () => void;
 }
 
 const RESOLUTIONS: { value: Resolution; label: string }[] = [
@@ -27,6 +29,8 @@ export default function Toolbar({
   setResolution,
   showChat,
   onToggleChat,
+  showFaq,
+  onToggleFaq,
 }: Props) {
   const btn = (mode: DrawingMode, label: string) => (
     <button
@@ -66,8 +70,18 @@ export default function Toolbar({
         </button>
       ))}
       <button
-        onClick={onToggleChat}
+        onClick={onToggleFaq}
         className={`mr-auto rounded px-3 py-1 text-sm ${
+          showFaq
+            ? "bg-blue-600 text-white"
+            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+        }`}
+      >
+        📚 שו&quot;ת חינמי
+      </button>
+      <button
+        onClick={onToggleChat}
+        className={`rounded px-3 py-1 text-sm ${
           showChat
             ? "bg-blue-600 text-white"
             : "bg-gray-800 text-gray-300 hover:bg-gray-700"

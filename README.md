@@ -94,6 +94,12 @@ Variables, ואחרי הוספה/שינוי צריך Redeploy כדי שהם יי
 - ✅ **שאלות מוכנות בצ'אט** — כשפותחים את הצ'אט ועוד לא נשלחה הודעה, מוצגות
   כמה שאלות לדוגמה כפתורי-לחיצה ("מה אני רואה בגרף?" וכו') בשביל מי שלא
   בטוח איך לנסח שאלה בעצמו.
+- ✅ **"📚 שו״ת חינמי" — מאגר שאלות ותשובות בלי AI ובלי עלות** (`src/lib/faq`,
+  `FaqPanel.tsx`) — כפתור נוסף בסרגל הכלים, לצד הצ'אט של Claude. מגיע עם
+  כ-15 שאלות מוכנות (הסברי אינדיקטורים + "איך עושים X באפליקציה"),
+  ואפשר להוסיף שאלות ותשובות משלך דרך "נהל את המאגר". החיפוש מבוסס
+  **התאמת מילות מפתח בלבד** (לא הבנת שפה אמיתית כמו AI) — מוצהר בממשק
+  עצמו כדי לא ליצור ציפייה לא נכונה. לגמרי חינמי, לא דורש מפתח API בכלל.
 
 ## מצב נוכחי: Phase 2א (הדרכה + התראות) ✅
 
@@ -210,20 +216,25 @@ src/
     InsightsPanel.tsx, HelpTooltip.tsx  — שכבת ההדרכה
     AlertsPanel.tsx, AlertToast.tsx     — ניהול והצגת התראות
     ChatPanel.tsx                        — חלון הצ'אט עם Claude
+    FaqPanel.tsx                          — מאגר שו״ת חינמי (בלי AI)
     PortfolioPanel.tsx                   — תיק IBKR (read-only)
     PresetsPanel.tsx                      — שמירה/טעינה של תבניות אינדיקטורים
+    OnboardingModal.tsx                   — מדריך הפתיחה
   hooks/
     useCandles.ts, useLiveQuote.ts     — נתוני הטיקר הפתוח
     useWatchlist.ts, useWatchlistQuotes.ts  — רשימת מעקב + ציטוטים לכולה
     useAlerts.ts                        — הגדרה/בדיקה/הפעלה של התראות
     useChat.ts                          — קריאת ה-streaming מ-/api/chat
+    useFaq.ts                            — ניהול מאגר השו״ת (מובנה + אישי)
     useIbkrPortfolio.ts                  — סטטוס חיבור + פוזיציות + keep-alive
     usePresets.ts                        — שמירה/טעינה של תבניות אינדיקטורים
+    useOnboarding.ts                     — מצב מדריך הפתיחה
   lib/
-    marketData/             — ממשק ספק נתונים + מימוש Stooq
+    marketData/             — ממשק ספק נתונים + מימוש Yahoo/Stooq
     indicators/              — SMA/EMA/RSI/MACD/Bollinger/VWAP (טהורים, ניתנים לבדיקה)
     insights/                — כללי "תובנות אוטומטיות" (לא AI — heuristics קבועות)
-    presets/types.ts         — טיפוס תבנית אינדיקטורים
+    presets/                 — טיפוס תבנית אינדיקטורים + תבניות מובנות
+    faq/                     — מאגר השו״ת: טיפוסים, תוכן מובנה, ואלגוריתם ההתאמה
     glossary.ts              — טקסטי ההסבר לכפתורי ה-"?"
     alerts/types.ts          — טיפוסי ההתראות
     claude/                  — קליינט Claude, ההנחיה הקבועה, ובניית הקונטקסט לצ'אט
