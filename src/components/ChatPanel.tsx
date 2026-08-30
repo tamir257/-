@@ -7,6 +7,13 @@ interface Props {
   buildContext: () => string;
 }
 
+const QUICK_QUESTIONS = [
+  "מה אני רואה בגרף הזה?",
+  "האם המניה במגמת עלייה או ירידה?",
+  "תסביר לי את האינדיקטורים שמופעלים כרגע",
+  "מה זה RSI ולמה זה חשוב?",
+];
+
 export default function ChatPanel({ buildContext }: Props) {
   const { messages, send, streaming } = useChat(buildContext);
   const [input, setInput] = useState("");
@@ -16,11 +23,11 @@ export default function ChatPanel({ buildContext }: Props) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  function handleSend() {
-    const text = input.trim();
-    if (!text || streaming) return;
+  function handleSend(text?: string) {
+    const clean = (text ?? input).trim();
+    if (!clean || streaming) return;
     setInput("");
-    send(text);
+    send(clean);
   }
 
   return (
@@ -36,10 +43,22 @@ export default function ChatPanel({ buildContext }: Props) {
 
       <div className="flex-1 overflow-y-auto px-3 py-2">
         {messages.length === 0 && (
-          <p className="text-xs text-gray-600">
-            לדוגמה: &quot;למה ה-RSI גבוה כרגע?&quot; או &quot;תסביר לי מה זה
-            הצלבת זהב&quot;.
-          </p>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-gray-600">
+              לא בטוח מה לשאול? תלחץ על אחת מהשאלות המוכנות:
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {QUICK_QUESTIONS.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => handleSend(q)}
+                  className="rounded-full bg-gray-800 px-3 py-1 text-xs text-gray-200 hover:bg-gray-700"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
         <div className="flex flex-col gap-2">
           {messages.map((m, i) => (
@@ -69,7 +88,7 @@ export default function ChatPanel({ buildContext }: Props) {
           className="w-full rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 outline-none placeholder:text-gray-500 disabled:opacity-50"
         />
         <button
-          onClick={handleSend}
+          onClick={() => handleSend()}
           disabled={streaming}
           className="rounded bg-blue-600 px-3 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
         >

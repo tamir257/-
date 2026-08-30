@@ -13,7 +13,9 @@ import AlertToast from "@/components/AlertToast";
 import ChatPanel from "@/components/ChatPanel";
 import PortfolioPanel from "@/components/PortfolioPanel";
 import PresetsPanel from "@/components/PresetsPanel";
+import OnboardingModal from "@/components/OnboardingModal";
 import { useCandles } from "@/hooks/useCandles";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { useLiveQuote } from "@/hooks/useLiveQuote";
 import { useWatchlist } from "@/hooks/useWatchlist";
 import { useWatchlistQuotes } from "@/hooks/useWatchlistQuotes";
@@ -141,6 +143,7 @@ export default function Home() {
     null;
 
   const { presets, savePreset, removePreset } = usePresets();
+  const { open: onboardingOpen, close: closeOnboarding, reopen: reopenOnboarding } = useOnboarding();
   function applyPreset(preset: IndicatorPreset) {
     setOverlays(preset.overlays);
     setShowRSI(preset.showRSI);
@@ -173,10 +176,20 @@ export default function Home() {
             <span className="text-xs text-red-400">{quoteError}</span>
           )}
         </div>
-        <span className="text-xs text-gray-500">
-          לשימוש אישי — לא מהווה ייעוץ השקעות
-        </span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={reopenOnboarding}
+            className="rounded bg-gray-800 px-2 py-1 text-xs text-gray-300 hover:bg-gray-700"
+          >
+            ❓ מדריך
+          </button>
+          <span className="text-xs text-gray-500">
+            לשימוש אישי — לא מהווה ייעוץ השקעות
+          </span>
+        </div>
       </header>
+
+      <OnboardingModal open={onboardingOpen} onClose={closeOnboarding} />
 
       <div className="flex flex-1">
         <aside className="flex w-56 shrink-0 flex-col overflow-y-auto">

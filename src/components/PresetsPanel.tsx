@@ -24,6 +24,8 @@ export default function PresetsPanel({
   onApply,
 }: Props) {
   const [name, setName] = useState("");
+  const builtins = presets.filter((p) => p.builtin);
+  const custom = presets.filter((p) => !p.builtin);
 
   function handleSave() {
     const clean = name.trim();
@@ -42,12 +44,35 @@ export default function PresetsPanel({
       <h2 className="mb-2 text-sm font-semibold text-gray-300">
         תבניות אינדיקטורים
       </h2>
+      <p className="mb-2 text-[11px] text-gray-500">
+        לא בטוח מאיפה להתחיל? תלחץ על אחת מהתבניות המוכנות למטה.
+      </p>
+
+      <ul className="mb-3 flex flex-col gap-1">
+        {builtins.map((preset) => (
+          <li key={preset.id}>
+            <button
+              onClick={() => onApply(preset)}
+              title={preset.description}
+              className="w-full rounded bg-gray-900 px-2 py-1.5 text-right text-xs text-gray-200 hover:bg-gray-800 hover:text-blue-400"
+            >
+              <div className="font-medium">{preset.name}</div>
+              {preset.description && (
+                <div className="mt-0.5 text-[10px] leading-relaxed text-gray-500">
+                  {preset.description}
+                </div>
+              )}
+            </button>
+          </li>
+        ))}
+      </ul>
+
       <div className="mb-2 flex gap-1">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSave()}
-          placeholder="שם לתבנית הנוכחית..."
+          placeholder="שמור את ההגדרה הנוכחית בשם..."
           className="w-full rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 outline-none placeholder:text-gray-500"
         />
         <button
@@ -58,7 +83,7 @@ export default function PresetsPanel({
         </button>
       </div>
       <ul className="flex flex-col gap-1">
-        {presets.map((preset) => (
+        {custom.map((preset) => (
           <li
             key={preset.id}
             className="flex items-center justify-between rounded bg-gray-900 px-2 py-1 text-xs text-gray-300"
@@ -79,8 +104,8 @@ export default function PresetsPanel({
             </button>
           </li>
         ))}
-        {presets.length === 0 && (
-          <li className="text-xs text-gray-600">אין תבניות שמורות עדיין</li>
+        {custom.length === 0 && (
+          <li className="text-xs text-gray-600">אין לך עדיין תבניות משלך</li>
         )}
       </ul>
     </div>
